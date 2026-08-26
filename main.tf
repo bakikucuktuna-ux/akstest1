@@ -48,7 +48,11 @@ resource "azurerm_public_ip" "pip-afw-lovable1-neu" {
   resource_group_name = azurerm_resource_group.rg-net-lovable1-neu.name
   allocation_method   = "Static"
   sku                 = "Standard"
-  zones               = ["1"]
+  zones               = ["1", "2", "3"]
+
+  lifecycle {
+    ignore_changes = [ip_tags]
+  }
 }
 
 // Azure Firewall in the traditional hub VNet
