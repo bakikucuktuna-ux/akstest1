@@ -80,6 +80,14 @@ resource "azurerm_subnet" "vnet-AzureBastionSubnet" {
   address_prefixes     = ["10.20.2.0/25"]
 }
 
+// AKS cluster subnet
+resource "azurerm_subnet" "snet-aks-lovable1-neu" {
+  name                 = "snet-aks-lovable1-neu"
+  resource_group_name  = azurerm_resource_group.rg-net-lovable1-neu.name
+  virtual_network_name = azurerm_virtual_network.vnet-lovable1-neu.name
+  address_prefixes     = ["10.20.1.0/26"]
+}
+
 /*
 resource "azurerm_public_ip" "pip-bas-lovable1-neu" {
   name                = "pip-bas-lovable1-neu"
