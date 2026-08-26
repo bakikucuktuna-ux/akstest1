@@ -6,7 +6,10 @@ resource "azurerm_kubernetes_cluster" "aks-lovable1-neu" {
   dns_prefix              = "aks-lovable1-neu"
   private_cluster_enabled = true
 
-  depends_on = [azurerm_subnet_route_table_association.rt-aks-assoc]
+  depends_on = [
+    azurerm_subnet_route_table_association.rt-aks-assoc,
+    azurerm_firewall_policy_rule_collection_group.aks-rules,
+  ]
 
   default_node_pool {
     name           = "system"
@@ -17,6 +20,10 @@ resource "azurerm_kubernetes_cluster" "aks-lovable1-neu" {
 
   identity {
     type = "SystemAssigned"
+  }
+
+  node_provisioning_profile {
+    mode = "Manual" // node pools are managed explicitly (default_node_pool), not AKS-automatic provisioning
   }
 
   network_profile {

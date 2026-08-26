@@ -40,6 +40,10 @@ resource "azurerm_firewall_policy" "afwpol-lovable1-neu" {
   resource_group_name = azurerm_resource_group.rg-net-lovable1-neu.name
   location            = azurerm_resource_group.rg-net-lovable1-neu.location
   sku                 = "Standard"
+
+  dns {
+    proxy_enabled = true
+  }
 }
 
 resource "azurerm_public_ip" "pip-afw-lovable1-neu" {
@@ -62,7 +66,6 @@ resource "azurerm_firewall" "afw-lovable1-neu" {
   resource_group_name = azurerm_resource_group.rg-net-lovable1-neu.name
   sku_name            = "AZFW_VNet"
   sku_tier            = "Standard"
-  zones               = ["1", "2", "3"]
   firewall_policy_id  = azurerm_firewall_policy.afwpol-lovable1-neu.id
 
   ip_configuration {
