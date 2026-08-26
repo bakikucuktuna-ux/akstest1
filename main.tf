@@ -40,6 +40,10 @@ resource "azurerm_firewall_policy" "afwpol-lovable1-neu" {
   resource_group_name = azurerm_resource_group.rg-net-lovable1-neu.name
   location            = azurerm_resource_group.rg-net-lovable1-neu.location
   sku                 = "Standard"
+
+  dns {
+    proxy_enabled = true
+  }
 }
 
 resource "azurerm_public_ip" "pip-afw-lovable1-neu" {
@@ -62,7 +66,6 @@ resource "azurerm_firewall" "afw-lovable1-neu" {
   resource_group_name = azurerm_resource_group.rg-net-lovable1-neu.name
   sku_name            = "AZFW_VNet"
   sku_tier            = "Standard"
-  zones               = ["1", "2", "3"]
   firewall_policy_id  = azurerm_firewall_policy.afwpol-lovable1-neu.id
 
   ip_configuration {
@@ -86,6 +89,25 @@ resource "azurerm_subnet" "snet-aks-lovable1-neu" {
   resource_group_name  = azurerm_resource_group.rg-net-lovable1-neu.name
   virtual_network_name = azurerm_virtual_network.vnet-lovable1-neu.name
   address_prefixes     = ["10.20.1.0/26"]
+}
+
+// Route table for the AKS subnet: default route sends all egress via the Azure Firewall
+resource "azurerm_route_table" "rt-aks-lovable1-neu" {
+  name                = "rt-aks-lovable1-neu"
+  location            = azurerm_resource_group.rg-net-lovable1-neu.location
+  resource_group_name = azurerm_resource_group.rg-net-lovable1-neu.name
+
+  route {
+    name                   = "default-via-firewall"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type          = "VirtualAppliance"
+    next_hop_in_ip_address = azurerm_firewall.afw-lovable1-neu.ip_configuration[0].private_ip_address
+  }
+}
+
+resource "azurerm_subnet_route_table_association" "rt-aks-assoc" {
+  subnet_id      = azurerm_subnet.snet-aks-lovable1-neu.id
+  route_table_id = azurerm_route_table.rt-aks-lovable1-neu.id
 }
 
 /*
